@@ -18,7 +18,6 @@ import os
 import gc
 import copy
 import random
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -29,23 +28,18 @@ from PIL import Image
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader, WeightedRandomSampler
 
-from torchvision import models, transforms
+from torchvision import models
 import torchvision.transforms as T
 import torchvision.transforms.functional as TF
 
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import (
-    confusion_matrix,
-    classification_report,
-    accuracy_score,
-    balanced_accuracy_score,
-    f1_score,
-)
 
 from tqdm import tqdm
+
+# NOTE: segmentation_models_pytorch is required for SMP models
+# Install with: pip install segmentation-models-pytorch
 
 # ============================================================
 # CONFIGURATION
@@ -549,9 +543,10 @@ def create_segmentation_model(model_name, in_channels=3, classes=1):
     try:
         import segmentation_models_pytorch as smp
     except ImportError:
-        import subprocess
-        subprocess.check_call(["pip", "install", "segmentation-models-pytorch", "--quiet"])
-        import segmentation_models_pytorch as smp
+        raise ImportError(
+            "segmentation_models_pytorch is required for SMP models. "
+            "Please install it with: pip install segmentation-models-pytorch"
+        )
     
     if model_name == 'SMP_UNet_ResNet50':
         model = smp.Unet(encoder_name="resnet50", encoder_weights="imagenet", 
